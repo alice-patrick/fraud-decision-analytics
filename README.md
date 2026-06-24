@@ -46,10 +46,16 @@ This dashboard evaluates the operational impact of adaptive fraud decision strat
 ### Dashboard Overview
 
 ![Dashboard Overview](docs/images/decision_dashboard_overview.png)
-![Dashboard View 1](docs/images/decision_dashboard_otherview(1).png)
-![Dashboard View 2](docs/images/decision_dashboard_otherview(2).png)
 
 The main dashboard provides a consolidated view of decision-centric fraud analytics, including system performance metrics, analyst prioritization, cost analysis, and operational monitoring.
+
+#### Additional Dashboard Views
+
+![Dashboard View 1](docs/images/decision_dashboard_otherview(1).png)
+
+![Dashboard View 2](docs/images/decision_dashboard_otherview(2).png)
+
+Additional dashboard pages provide deeper operational visibility into decision outcomes, investigation workflows, fraud prioritization, and monitoring metrics.
 
 ---
 
