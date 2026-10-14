@@ -21,32 +21,32 @@ These are observations from one offline synthetic-data scenario, **not real-worl
 
 A concise view of transaction volume, fraud rate, investigations and detection performance. An optional comparison shows the **Static baseline** alongside the **Adaptive alternative**, without making model mechanics the focus.
 
-![Fraud Operations Analytics — business overview and investigation strategy comparison](docs/images/01_overview.png)
+![Fraud Operations Analytics — business overview and investigation strategy comparison](images/01_overview.png)
 
 ### 2. Transaction Patterns — where fraud is concentrated
 
 Explores transaction volume and the difference between **fraud counts** and **fraud rates** across payment types. Includes a downloadable transaction summary.
 
-![Transaction volumes, fraud counts, fraud rates and business insight](docs/images/02_transaction_patterns.png)
+![Transaction volumes, fraud counts, fraud rates and business insight](images/02_transaction_patterns.png)
 
 ### 3. Investigation Performance — where capacity is constrained
 
 Shows review capacity by operational step and highlights where alerts were left uninvestigated. The emphasis is on understanding workload and identifying operational bottlenecks.
 
-![Investigation capacity, alerts not reviewed and workload by step](docs/images/03_investigation_performance.png)
+![Investigation capacity, alerts not reviewed and workload by step](images/03_investigation_performance.png)
 
 ### 4. Performance Monitoring — how results change
 
 Tracks fraud detection rates across **consecutive transaction groups**, not calendar periods. Insights include the actual fraud counts behind percentages to avoid misleading interpretations of small samples.
 
-![Fraud detection rates across reporting groups with business insight](docs/images/04_monitoring.png)
+![Fraud detection rates across reporting groups with business insight](images/04_monitoring.png)
 
 <details>
 <summary><strong>Additional view: Filterable investigation records</strong></summary>
 
 The dashboard also provides transaction-type, investigation-outcome and actual-label filters, plus a CSV export of the selected alert records.
 
-![Filterable alert records and CSV export](docs/images/05_alert_records.png)
+![Filterable alert records and CSV export](images/04.1_monitoring.png)
 
 </details>
 
