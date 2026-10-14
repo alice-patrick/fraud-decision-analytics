@@ -1,76 +1,101 @@
-# Fraud Decision Analytics
+# Fraud Operations Analytics
 
-**SQL · SQLite · Python · pandas · Streamlit · Plotly**  
-*Data Analytics portfolio project | Fraud operations & KPI reporting*
+**SQL · Python · SQLite · pandas · Streamlit · Plotly**  
+*Data Analyst portfolio project | Fraud patterns, operational KPIs and reporting*
 
-An interactive reporting application that turns **simulated fraud-investigation decisions** into clear operational insights. It compares **Static vs Adaptive** investigation policies, tracks analyst workload and makes individual alert decisions auditable.
+A business-focused dashboard that analyses **synthetic payment transactions** and **simulated fraud-investigation results**. It turns raw reporting data into clear answers about transaction activity, where fraud occurs, investigation workload and changes in detection performance.
 
-**My focus in this repository is analytics—not training a fraud model.** The separate [Decision-Centric Fraud Framework](https://github.com/alice-patrick/decision-centric-fraud-framework) generates the scores and sequential decisions; this project validates, stores and analyses its results.
+The focus of this repository is **data analytics and business reporting**, not model training. Investigation outcomes are imported from the separate [Decision-Centric Fraud Framework](https://github.com/alice-patrick/decision-centric-fraud-framework).
 
-## What this project demonstrates
+## Key findings from a 10,000-transaction sample
 
-- **SQL:** CTEs, `JOIN`/`LEFT JOIN`, conditional aggregation, `ROW_NUMBER()` and cumulative `SUM() OVER (...)` in the [reporting dashboard code](dashboards/thesis_decision_dashboard.py).
-- **Data integration and quality:** importing FastAPI JSON results into SQLite; reconciling investigation counts, fraud labels, per-step capacity and KPI totals before reporting.
-- **Business reporting:** monitoring investigated, suppressed and capacity-rejected alerts, fraud coverage, operational workload and **estimated** costs.
-- **Interactive analysis:** comparing policies, filtering investigation records and reviewing recorded decisions by transaction and operational step.
+- **Fraud detection:** 313 investigations identified **27 of 68** labelled fraud cases (**39.7% detection rate**), while reviewing **3.1%** of transactions in the Static baseline.
+- **Transaction patterns:** `PAYMENT` accounted for the most transactions (**5,465**), but `TRANSFER` had the highest observed fraud rate (**3.58%**, or 33 of 921 transactions).
+- **Operational workload:** **410** eligible alerts were not investigated because capacity was full in four review steps, while **37** review slots went unused in other steps. Unused slots could not be transferred between steps in this simulation.
 
-### Example business insight
+These are observations from one offline synthetic-data scenario, **not real-world banking performance**.
 
-In one **10,000-transaction sequential simulation** (50 analyst reviews per step, 3-step suppression), the Adaptive policy detected **30 frauds vs 27** for Static, while investigating **349 vs 313** alerts. Its modeled operational cost was **€18,547.72 lower** in that scenario.
+## Dashboard
 
-*Illustrative simulation result, not realized financial savings. Results depend on configuration; the current importer defaults to 30 reviews per step, so a fresh default run will produce different totals.*
+### 1. Overview — the business snapshot
 
-## The dashboard
+A concise view of transaction volume, fraud rate, investigations and detection performance. An optional comparison shows the **Static baseline** alongside the **Adaptive alternative**, without making model mechanics the focus.
 
-| View | What you can analyse |
+![Fraud Operations Analytics — business overview and investigation strategy comparison](docs/images/01_overview.png)
+
+### 2. Transaction Patterns — where fraud is concentrated
+
+Explores transaction volume and the difference between **fraud counts** and **fraud rates** across payment types. Includes a downloadable transaction summary.
+
+![Transaction volumes, fraud counts, fraud rates and business insight](docs/images/02_transaction_patterns.png)
+
+### 3. Investigation Performance — where capacity is constrained
+
+Shows review capacity by operational step and highlights where alerts were left uninvestigated. The emphasis is on understanding workload and identifying operational bottlenecks.
+
+![Investigation capacity, alerts not reviewed and workload by step](docs/images/03_investigation_performance.png)
+
+### 4. Performance Monitoring — how results change
+
+Tracks fraud detection rates across **consecutive transaction groups**, not calendar periods. Insights include the actual fraud counts behind percentages to avoid misleading interpretations of small samples.
+
+![Fraud detection rates across reporting groups with business insight](docs/images/04_monitoring.png)
+
+<details>
+<summary><strong>Additional view: Filterable investigation records</strong></summary>
+
+The dashboard also provides transaction-type, investigation-outcome and actual-label filters, plus a CSV export of the selected alert records.
+
+![Filterable alert records and CSV export](docs/images/05_alert_records.png)
+
+</details>
+
+## Skills demonstrated
+
+| Area | Application in this project |
 | --- | --- |
-| **Overview** | KPIs and side-by-side policy comparison, including investigation volume, fraud detection and estimated cost |
-| **Analyst Capacity** | Alert outcomes, capacity by operational step, prioritised investigation queue and decision explanations |
-| **Audit Trail** | Candidate-level decisions, retrospective labels, filters and transaction-type patterns |
-| **Monitoring** | Trends across the reporting windows exported by the main simulation |
+| **SQL & SQLite** | CTEs, `JOIN` / `LEFT JOIN`, grouped aggregations, `ROW_NUMBER()` and cumulative `SUM() OVER (...)` for reporting |
+| **Data preparation & validation** | Python/pandas import of structured API results, consistency checks and reusable reporting tables |
+| **Business analysis** | Fraud-rate comparisons, investigation workload, capacity utilisation and evidence-based insights |
+| **Data visualisation** | Streamlit dashboard, Plotly charts, interactive filters and CSV exports |
 
-**Interface reference:** the screenshots below are from an **earlier Analytics UI revision**. The current dashboard uses the four views above and the updated sequential reporting database.
+The report queries and dashboard are in [`dashboards/thesis_decision_dashboard.py`](dashboards/thesis_decision_dashboard.py). The validated API-to-SQLite import is in [`scripts/import_from_thesis_api.py`](scripts/import_from_thesis_api.py).
 
-![Earlier Analytics dashboard overview](docs/images/decision_dashboard_overview.png)
+## Data flow
 
-![Earlier Analytics investigation queue](docs/images/analyst_queue.png)
+`Main Framework (sequential simulation)` → `FastAPI JSON` → `Validated Python import` → `SQLite / SQL analysis` → `Streamlit dashboard`
 
-## How the reporting pipeline works
+The [Main Framework](https://github.com/alice-patrick/decision-centric-fraud-framework) generates fraud scores and investigation decisions. **This Analytics repository reports and examines those existing outcomes**; it does not retrain models or recalculate fraud decisions.
 
-```text
-Main Fraud Framework (scoring + sequential simulation)
-    → GET /simulation/sequential
-    → Validate API results and import to SQLite
-    → SQL queries (CTEs, JOINs, aggregations, window functions)
-    → Streamlit dashboard
-```
+## Run locally
 
-The importer writes six reporting tables: `seq_runs`, `seq_policy_summary`, `seq_decisions`, `seq_transaction_types`, `seq_operational_steps` and `seq_monitoring_windows`. **`seq_decisions` contains alert candidates, not every transaction**; overall transaction totals come from the original simulation summary.
-
-Both policies are compared using the **same sequential simulation settings**. No separate batch-only metrics or arbitrary global investigation cap are introduced by the analytics dashboard.
-
-## Run locally (Windows)
-
-**Prerequisite:** The [main framework](https://github.com/alice-patrick/decision-centric-fraud-framework) must be configured with its model and PaySim data, and its FastAPI server must be running. From the **main project's** folder, start it in a separate terminal:
-
-```cmd
-python -m uvicorn app.api.main:app --host 127.0.0.1 --port 8002
-```
-
-From **this Analytics repository**, in a second terminal:
+**Windows / Command Prompt** — from this Analytics repository:
 
 ```cmd
 py -m venv .venv
 .venv\Scripts\activate.bat
 python -m pip install -r requirements.txt
+python -m streamlit run dashboards\thesis_decision_dashboard.py
+```
+
+Open **http://localhost:8501**. If `data/processed/fraud_investigation.db` already contains the imported sequential results, **you do not need to start the Main API** to view the dashboard.
+
+**First-time setup (when the SQLite report database is missing):** start the Main Framework API in its own project folder, with its model and PaySim data configured:
+
+```cmd
+python -m uvicorn app.api.main:app --host 127.0.0.1 --port 8002
+```
+
+Then, from this Analytics repository, import the results before starting Streamlit:
+
+```cmd
+.venv\Scripts\activate.bat
 python scripts\import_from_thesis_api.py --api-url http://127.0.0.1:8002
 python -m streamlit run dashboards\thesis_decision_dashboard.py
 ```
 
-If the main API runs on **8003**, use `--api-url http://127.0.0.1:8003` in the import command instead. The dashboard reads the resulting local file at `data/processed/fraud_investigation.db`; you do not need the API running just to inspect an already imported report.
+If your Main API runs on port **8003**, replace `8002` with `8003` in the import command. The imported SQLite database is a local generated file and is not included in this repository.
 
-## Scope and limitations
+## Scope
 
-PaySim is **synthetic data**. The replay is offline, fraud labels are used **retrospectively** for evaluation, and financial impacts are **modeled estimates**—not observed bank losses or actual savings. This is a research/portfolio reporting application, **not a production fraud-monitoring service**.
-
-**Related project:** [Decision-Centric Fraud Framework — simulation and ML layer](https://github.com/alice-patrick/decision-centric-fraud-framework)
+The data comes from **PaySim (synthetic financial transactions)** and an **offline sequential simulation**. Fraud labels are used retrospectively to evaluate results; cost estimates depend on simulation assumptions. This project is for **analysis and portfolio demonstration**, not live fraud monitoring.
