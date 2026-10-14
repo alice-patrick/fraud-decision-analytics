@@ -13,7 +13,7 @@ The focus of this repository is **data analytics and business reporting**, not m
 - **Transaction patterns:** `PAYMENT` accounted for the most transactions (**5,465**), but `TRANSFER` had the highest observed fraud rate (**3.58%**, or 33 of 921 transactions).
 - **Operational workload:** **410** eligible alerts were not investigated because capacity was full in four review steps, while **37** review slots went unused in other steps. Unused slots could not be transferred between steps in this simulation.
 
-These are observations from one offline synthetic-data scenario, **not real-world banking performance**.
+**Reported scenario:** 10,000 synthetic transactions; **50 review slots per operational step**; 3-step repeat-alert suppression; €10 assumed review cost; Static threshold 0.50; Adaptive risk floor 0.30 and budget multiplier 1.40. These are observations from an **offline, saved simulation scenario**, not real-world banking performance or realised savings. The **current importer defaults to 30 slots per step**; importing again with the default settings may produce different counts. The sample and model version also affect reproducibility.
 
 ## Dashboard
 
@@ -55,17 +55,19 @@ The dashboard also provides transaction-type, investigation-outcome and actual-l
 | Area | Application in this project |
 | --- | --- |
 | **SQL & SQLite** | CTEs, `JOIN` / `LEFT JOIN`, grouped aggregations, `ROW_NUMBER()` and cumulative `SUM() OVER (...)` for reporting |
-| **Data preparation & validation** | Python/pandas import of structured API results, consistency checks and reusable reporting tables |
+| **Data preparation & validation** | Python/pandas import of structured API results, consistency checks and six SQLite reporting tables |
 | **Business analysis** | Fraud-rate comparisons, investigation workload, capacity utilisation and evidence-based insights |
 | **Data visualisation** | Streamlit dashboard, Plotly charts, interactive filters and CSV exports |
 
-The report queries and dashboard are in [`dashboards/thesis_decision_dashboard.py`](dashboards/thesis_decision_dashboard.py). The validated API-to-SQLite import is in [`scripts/import_from_thesis_api.py`](scripts/import_from_thesis_api.py).
+**SQL examples in the actual implementation:** [fraud patterns — `LEFT JOIN` and grouped aggregation](dashboards/thesis_decision_dashboard.py#L56-L79) · [investigation workload — CTEs and cumulative `SUM() OVER`](dashboards/thesis_decision_dashboard.py#L80-L108) · [transaction audit — `ROW_NUMBER()`](dashboards/thesis_decision_dashboard.py#L109-L125).
+
+The reporting queries and dashboard are in [`dashboards/thesis_decision_dashboard.py`](dashboards/thesis_decision_dashboard.py); the validated import is in [`scripts/import_from_thesis_api.py`](scripts/import_from_thesis_api.py).
 
 ## Data flow
 
-`Main Framework (sequential simulation)` → `FastAPI JSON` → `Validated Python import` → `SQLite / SQL analysis` → `Streamlit dashboard`
+**Main Framework sequential results** → FastAPI JSON → Python validation/import → **SQLite and SQL reporting** → Streamlit dashboard.
 
-The [Main Framework](https://github.com/alice-patrick/decision-centric-fraud-framework) generates fraud scores and investigation decisions. **This Analytics repository reports and examines those existing outcomes**; it does not retrain models or recalculate fraud decisions.
+The [Main Framework](https://github.com/alice-patrick/decision-centric-fraud-framework) generates the risk scores and investigation decisions. This repository **analyses the saved results**, without retraining the model or rerunning decision logic.
 
 ## Run locally
 
@@ -78,15 +80,15 @@ python -m pip install -r requirements.txt
 python -m streamlit run dashboards\thesis_decision_dashboard.py
 ```
 
-Open **http://localhost:8501**. If `data/processed/fraud_investigation.db` already contains the imported sequential results, **you do not need to start the Main API** to view the dashboard.
+Open **http://localhost:8501**. When `data/processed/fraud_investigation.db` already holds the imported sequential results, the Main API does **not** need to be running to view the dashboard.
 
-**First-time setup (when the SQLite report database is missing):** start the Main Framework API in its own project folder, with its model and PaySim data configured:
+**First-time import (SQLite database missing):** start the Main Framework API in its own project folder with its model and PaySim data available:
 
 ```cmd
 python -m uvicorn app.api.main:app --host 127.0.0.1 --port 8002
 ```
 
-Then, from this Analytics repository, import the results before starting Streamlit:
+Then, in the Analytics repository, import and launch the dashboard:
 
 ```cmd
 .venv\Scripts\activate.bat
@@ -94,8 +96,8 @@ python scripts\import_from_thesis_api.py --api-url http://127.0.0.1:8002
 python -m streamlit run dashboards\thesis_decision_dashboard.py
 ```
 
-If your Main API runs on port **8003**, replace `8002` with `8003` in the import command. The imported SQLite database is a local generated file and is not included in this repository.
+If your Main API uses **8003**, substitute that port in the importer command. The current importer's default scenario uses **30 review slots per step**, so new imports may not match the **50-slot archived results** pictured above. Importing stores the results in a local SQLite file, which is **not included in this GitHub repository**.
 
 ## Scope
 
-The data comes from **PaySim (synthetic financial transactions)** and an **offline sequential simulation**. Fraud labels are used retrospectively to evaluate results; cost estimates depend on simulation assumptions. This project is for **analysis and portfolio demonstration**, not live fraud monitoring.
+This is a **portfolio and research prototype**, based on synthetic PaySim transactions and offline sequential simulation. Fraud labels are retrospective, and estimated costs depend on simplified assumptions. It is **not** a live bank-monitoring or production fraud-detection system.
