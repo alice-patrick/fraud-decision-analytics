@@ -1,44 +1,28 @@
-# Fixing Windows `WinError 32` after successful sequential import
+# Apply the Fraud Decision Analytics UI update
 
-The Main API simulation succeeded and six SQLite tables were written. The old
-importer did not close its SQLite connection before replacing the database.
+This package **only updates the Streamlit dashboard and README**, adds a screenshot guide, and includes two screenshots supplied by you. It does **not** touch the Main Framework, SQLite, importer, or API settings.
 
-## Recover without re-running the 1k/3k/10k simulations
-
-1. Stop every Streamlit terminal with **Ctrl+C**, close DB Browser for SQLite,
-   VS Code SQLite database preview, and other programs that may hold the .db open.
-2. Replace `scripts/import_from_thesis_api.py` and
-   `dashboards/thesis_decision_dashboard.py` with the matching files in this ZIP;
-   add `scripts/recover_pending_sqlite.py`.
-3. In CMD:
+1. In the Analytics CMD, stop Streamlit with **Ctrl+C**. You may leave the Main API running.
+2. Back up `dashboards/thesis_decision_dashboard.py` and `README.md` from `C:\Users\PATRI\fraud-decision-analytics`.
+3. Unzip the package **into** `C:\Users\PATRI\fraud-decision-analytics`, allowing replacement of `dashboards\thesis_decision_dashboard.py` and `README.md`.
+4. Start the dashboard again:
 
 ```cmd
 cd /d C:\Users\PATRI\fraud-decision-analytics
 .venv\Scripts\activate.bat
-python scripts\recover_pending_sqlite.py
-```
-
-The recovery script reads the existing `data/processed/fraud_investigation.pending.db`,
-checks SQLite integrity, all six tables, and Static/Adaptive counts. It backs
-up your previous `fraud_investigation.db` before replacing it. If Windows still
-holds the file open, nothing is overwritten and you can retry after closing it.
-
-4. If recovery succeeds:
-
-```cmd
 python -m streamlit run dashboards\thesis_decision_dashboard.py
 ```
 
-## If the pending file is absent
+5. Open **Overview** and expand **Explore Transaction Flow · Static**. Switch the sidebar policy to **Adaptive** and verify the corresponding chart. **Audit Trail** should now show only the filtered decision audit and its CSV export.
 
-With the Main API running in a separate CMD on your desired port (default 8002;
-8003 also works), run the corrected importer:
+No new API import, model training, or SQLite recovery is required.
+
+When the screenshots are complete, stage the dashboard, README and genuine image files for GitHub:
 
 ```cmd
-set "THESIS_API_BASE_URL=http://127.0.0.1:8003"
-python scripts\import_from_thesis_api.py
+git add dashboards/thesis_decision_dashboard.py README.md docs/SCREENSHOT_GUIDE.md docs/images/03_transaction_flow_static.png docs/images/05_investigation_queue_static.png
+git commit -m "Move transaction flow to Overview and refresh Analytics documentation"
+git push origin main
 ```
 
-**Do not type the `(.venv) C:\...>` prompt.** Type only CMD commands.
-
-The Main Framework code is not changed by these files.
+If you add further Adaptive screenshots, include them in `git add` after the files actually exist.
